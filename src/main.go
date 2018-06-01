@@ -98,8 +98,13 @@ func HandleWXPost(w http.ResponseWriter, r *http.Request){
 	reply.FromUserName=request.ToUserName
 	reply.ToUserName=request.FromUserName
 	reply.MsgType="text"
+	str,err:=xml.Marshal(reply)
+	if(err!=nil){
+		fmt.Println("server data error")
+		return
+	}
 	//to do process
-	fmt.Fprintf(w,"test")
+	fmt.Fprintf(w,string(str))
 }
 
 func HandleWX(w http.ResponseWriter, r *http.Request) {
@@ -133,7 +138,7 @@ func test(){
 }
 
 func main() {
-	test()
+	//test()
 	http.HandleFunc("/", Index)
 	http.HandleFunc("/wx", HandleWX)
 
