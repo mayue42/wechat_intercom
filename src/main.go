@@ -6,6 +6,10 @@ import (
 	"net/http"
 	"log"
 
+	"sort"
+	"crypto/sha1"
+	"io"
+	"strings"
 )
 
 const token string="token123"
@@ -18,27 +22,34 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "hello")
 }
 
+
+func makeSignature(timestamp string, nonce string) string {
+	sl := []string{token, timestamp, nonce}
+	sort.Strings(sl)
+	s := sha1.New()
+	io.WriteString(s, strings.Join(sl, ""))
+	return fmt.Sprintf("%x", s.Sum(nil))
+}
+
+
 func HandleWX(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	fmt.Println(r.Body)
-	//data = web.input()
-	//if len(data) == 0:
-	//return "hello, this is handle view"
-	//signature = data.signature
-	//timestamp = data.timestamp
-	//nonce = data.nonce
-	//echostr = data.echostr
-	//token = "token123" #请按照公众平台官网\基本配置中信息填写
-	//
-	//list = [token, timestamp, nonce]
-	//list.sort()
-	//sha1 = hashlib.sha1()
-	//map(sha1.update, list)
-	//hashcode = sha1.hexdigest()
-	//print "handle/GET func: hashcode, signature: ", hashcode, signature
-	//if hashcode == signature:
-	//return echostr
-	fmt.Fprintf(w, "hello2")
+	fmt.Println(r.URL)
+	if(r.Form==nil){
+		fmt.Fprintf(w, "parameter need")
+	}
+	signature:= r.Form.Get("signature")
+	timestamp:= r.Form.Get("timestamp")
+	nonce := r.Form.Get("nonce")
+	echostr := r.Form.Get("echostr")
+
+	hashcode := makeSignature(timestamp,nonce)
+	if hashcode == signature{
+		fmt.Fprintf(w,echostr+"123")
+	}else {
+		fmt.Fprintf(w, "parameter error")
+	}
 }
 
 
