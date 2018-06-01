@@ -46,8 +46,8 @@ func HandleWX(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/", Index)
 	http.HandleFunc("/wx", HandleWX)
-	fmt.Println("listen on port 9090")
-	err := http.ListenAndServe(":9090", nil);
+	fmt.Println("listen on port 80")
+	err := http.ListenAndServe(":80", nil);
 	if  err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
