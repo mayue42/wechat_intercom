@@ -35,20 +35,28 @@ func makeSignature(timestamp string, nonce string) string {
 	return fmt.Sprintf("%x", s.Sum(nil))
 }
 type RequestData struct{
+	XMLName xml.Name `xml:"xml"`
 	ToUserName string `xml:"ToUserName"`
 	FromUserName string `xml:"FromUserName"`
 	CreateTime int64 `xml:"CreateTime"`
-	MsgType string `xml:"MsgType"`
-	Content string `xml:"Content"`
+	MsgType xml.CharData `xml:"MsgType"`
+	Content xml.CharData `xml:"Content"`
 	MsgId string `xml:"MsgId"`
 }
 
+
+type CdataString struct {
+	Value string `xml:",cdata"`
+}
+
+
 type ReplyData struct {
+	XMLName xml.Name `xml:"xml"`
 	ToUserName string `xml:"ToUserName"`
 	FromUserName string `xml:"FromUserName"`
 	CreateTime int64 `xml:"CreateTime"`
-	MsgType string `xml:"MsgType"`
-	Content string `xml:"Content"`
+	MsgType CdataString `xml:"MsgType"`
+	Content CdataString `xml:"Content"`
 }
 
 
@@ -93,18 +101,21 @@ func HandleWXPost(w http.ResponseWriter, r *http.Request){
 	fmt.Println(request)
 
 	reply:=ReplyData{}
-	reply.Content="test"
+	reply.Content=CdataString{"test"}
 	reply.CreateTime=(time.Now().Unix())
 	reply.FromUserName=request.ToUserName
 	reply.ToUserName=request.FromUserName
-	reply.MsgType="text"
+	reply.MsgType=CdataString{"text"}
 	str,err:=xml.Marshal(reply)
 	if(err!=nil){
 		fmt.Println("server data error")
 		return
 	}
+	//body := bytes.NewBuffer([]byte(str))
+	//fmt.Println(body)
 	//to do process
-	fmt.Fprintf(w,string(str))
+	//fmt.Fprintf(w,body)
+	w.Write(str)
 }
 
 func HandleWX(w http.ResponseWriter, r *http.Request) {
@@ -131,9 +142,22 @@ func test(){
 	"<Content><![CDATA[ooooooooooooooooooooooo]]></Content>"+
 	"<MsgId>6561999276080967450</MsgId>"+
 	"</xml>"
-	v:=RequestData{}
-	xml.Unmarshal([]byte(str),&v)
-	fmt.Println(v)
+	request:=RequestData{}
+	xml.Unmarshal([]byte(str),&request)
+	fmt.Println(request)
+
+	reply:=ReplyData{}
+	reply.Content=CdataString{"test"}
+	reply.CreateTime=(time.Now().Unix())
+	reply.FromUserName=request.ToUserName
+	reply.ToUserName=request.FromUserName
+	reply.MsgType=CdataString{"text"}
+	b,err:=xml.MarshalIndent(reply,"","")
+	if(err!=nil){
+		fmt.Println("server data error")
+		return
+	}
+	fmt.Println(string(b))
 	os.Exit(0)
 }
 
