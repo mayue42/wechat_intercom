@@ -14,6 +14,7 @@ import (
 	"encoding/xml"
 	"os"
 	"time"
+	"wechat"
 )
 
 const token string="token123"
@@ -133,6 +134,8 @@ func HandleWX(w http.ResponseWriter, r *http.Request) {
 		HandleWXPost(w,r)
 	}
 }
+
+
 
 func test(){
 	str:="<xml><ToUserName><![CDATA[gh_1ce6b93e2b4d]]></ToUserName>"+
