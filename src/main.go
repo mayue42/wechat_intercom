@@ -10,6 +10,10 @@ import (
 	"crypto/sha1"
 	"io"
 	"strings"
+	"io/ioutil"
+	"encoding/xml"
+	"os"
+	"time"
 )
 
 const token string="token123"
@@ -30,6 +34,23 @@ func makeSignature(timestamp string, nonce string) string {
 	io.WriteString(s, strings.Join(sl, ""))
 	return fmt.Sprintf("%x", s.Sum(nil))
 }
+type RequestData struct{
+	ToUserName string `xml:"ToUserName"`
+	FromUserName string `xml:"FromUserName"`
+	CreateTime int64 `xml:"CreateTime"`
+	MsgType string `xml:"MsgType"`
+	Content string `xml:"Content"`
+	MsgId string `xml:"MsgId"`
+}
+
+type ReplyData struct {
+	ToUserName string `xml:"ToUserName"`
+	FromUserName string `xml:"FromUserName"`
+	CreateTime int64 `xml:"CreateTime"`
+	MsgType string `xml:"MsgType"`
+	Content string `xml:"Content"`
+}
+
 
 //http://127.0.0.1/wx?signature=c1204eef817136c24000e43cbdc5851e8bfead92&echostr=aaa&timestamp=1527827016&nonce=3943144772
 func HandleWXGet(w http.ResponseWriter, r *http.Request){
@@ -50,26 +71,46 @@ func HandleWXGet(w http.ResponseWriter, r *http.Request){
 }
 
 func HandleWXPost(w http.ResponseWriter, r *http.Request){
+	//check
 	if(r.Form==nil){
 		fmt.Fprintf(w, "parameter need")
 	}
 	signature:= r.Form.Get("signature")
 	timestamp:= r.Form.Get("timestamp")
 	nonce := r.Form.Get("nonce")
-	echostr := r.Form.Get("echostr")
-
 	hashcode := makeSignature(timestamp,nonce)
-	if hashcode == signature{
-		fmt.Fprintf(w,echostr)
-	}else {
+	if hashcode != signature{
 		fmt.Fprintf(w, "parameter error")
+		return
 	}
+
+	//get content
+	result, _:= ioutil.ReadAll(r.Body)
+	r.Body.Close()
+	fmt.Printf("%s\n", result)
+	request:=RequestData{}
+	xml.Unmarshal([]byte(result),&request)
+	fmt.Println(request)
+
+	reply:=ReplyData{}
+	reply.Content="test"
+	reply.CreateTime=(time.Now().Unix())
+	reply.FromUserName=request.ToUserName
+	reply.ToUserName=request.FromUserName
+	reply.MsgType="text"
+	//to do process
+	fmt.Fprintf(w,"test")
 }
 
 func HandleWX(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	fmt.Println(r.Body)
+	fmt.Println(r)
+	fmt.Println("url:")
 	fmt.Println(r.URL)
+	fmt.Println("body:")
+	fmt.Println(r.Body)
+	fmt.Println("postform:")
+	fmt.Println(r.PostForm)
 	if(r.Method=="GET"){
 		HandleWXGet(w,r)
 	}else if(r.Method=="POST"){
@@ -77,9 +118,22 @@ func HandleWX(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
+func test(){
+	str:="<xml><ToUserName><![CDATA[gh_1ce6b93e2b4d]]></ToUserName>"+
+	"<FromUserName><![CDATA[oN4RB1qOBvrkwBi9diMYeqyXE0fc]]></FromUserName>"+
+	"<CreateTime>1527834515</CreateTime>"+
+	"<MsgType><![CDATA[text]]></MsgType>"+
+	"<Content><![CDATA[ooooooooooooooooooooooo]]></Content>"+
+	"<MsgId>6561999276080967450</MsgId>"+
+	"</xml>"
+	v:=RequestData{}
+	xml.Unmarshal([]byte(str),&v)
+	fmt.Println(v)
+	os.Exit(0)
+}
 
 func main() {
+	test()
 	http.HandleFunc("/", Index)
 	http.HandleFunc("/wx", HandleWX)
 
