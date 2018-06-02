@@ -137,7 +137,7 @@ func HandleWX(w http.ResponseWriter, r *http.Request) {
 
 
 
-func test(){
+func xmltest(){
 	str:="<xml><ToUserName><![CDATA[gh_1ce6b93e2b4d]]></ToUserName>"+
 	"<FromUserName><![CDATA[oN4RB1qOBvrkwBi9diMYeqyXE0fc]]></FromUserName>"+
 	"<CreateTime>1527834515</CreateTime>"+
@@ -163,6 +163,7 @@ func test(){
 	fmt.Println(string(b))
 	os.Exit(0)
 }
+
 
 func main() {
 	//test()
