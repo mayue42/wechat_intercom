@@ -16,10 +16,9 @@ import (
 	"time"
 	"wechat"
 	intercom "gopkg.in/intercom/intercom-go.v2"
+	myintercom "intercom"
 )
 
-
-var ic *intercom.Client=nil
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
@@ -79,7 +78,12 @@ func HandleWXGet(w http.ResponseWriter, r *http.Request){
 		fmt.Fprintf(w, "parameter error")
 	}
 }
-
+type User struct{
+	wechat_user *wechat.UserInfoReply
+	intercom_id string
+}
+var user_map =map[string]*User{}
+var ic = intercom.NewClient(myintercom.APP_ID,"")
 func HandleWXPost(w http.ResponseWriter, r *http.Request){
 	//check
 	if(r.Form==nil){
@@ -113,11 +117,33 @@ func HandleWXPost(w http.ResponseWriter, r *http.Request){
 		fmt.Println("server data error")
 		return
 	}
+	w.Write(str)
 	//body := bytes.NewBuffer([]byte(str))
 	//fmt.Println(body)
 	//to do process
 	//fmt.Fprintf(w,body)
-	w.Write(str)
+	openid:=request.FromUserName
+	if(user_map[openid]==nil){
+		user,err:=wechat.GetUserInfo(openid)
+		if(err!=nil){
+			fmt.Println(err.Error())
+			return
+		}
+		itercom_user := intercom.User{
+			UserID: openid,
+			Name: user.NickName,
+			UpdatedAt: int64(time.Now().Unix()),
+
+			//CustomAttributes: map[string]interface{}{"is_cool": true},
+		}
+		savedUser, err := ic.Users.Save(&itercom_user)
+		if(err!=nil){
+			fmt.Println(err.Error())
+		}
+		fmt.Println(savedUser)
+		user_map[openid]=&User{user,savedUser.ID}
+
+	}
 }
 
 func HandleWX(w http.ResponseWriter, r *http.Request) {
@@ -165,13 +191,35 @@ func xmltest(){
 	os.Exit(0)
 }
 func intercomtest(){
-	//ic = intercom.NewClient(myintercom.APP_ID,myintercom.ACCESS_TOKEN)
-	//convoList, err := intercom.ConversationService.ListAll(intercom.PageParams{})
-	//if(err!=nil){
-	//	fmt.Errorf(err.Error())
-	//}
-	//fmt.Println(convoList)
-	//os.Exit(0)
+
+	fmt.Println(ic.AppID)
+	fmt.Println(ic.APIKey)
+	user := intercom.User{
+		UserID: "27",
+		Email: "test@example.com",
+		Name: "InterGopher",
+		SignedUpAt: int64(time.Now().Unix()),
+		CustomAttributes: map[string]interface{}{"is_cool": true},
+	}
+	savedUser, err := ic.Users.Save(&user)
+	if(err!=nil){
+		fmt.Println(err.Error())
+	}
+	fmt.Println(savedUser)
+
+	msg := intercom.NewUserMessage(intercom.User{Email: "test@example.com"}, "body123")
+	savedMessage, err := ic.Messages.Save(&msg)
+	if(err!=nil){
+		fmt.Println(err.Error())
+	}
+	fmt.Println(savedMessage)
+
+	l,err:=ic.Conversations.ListAll(intercom.PageParams{})
+		if(err!=nil){
+		fmt.Println(err.Error())
+	}
+	fmt.Println(l)
+	os.Exit(0)
 }
 
 func testtemp(){
@@ -186,10 +234,9 @@ func testtemp(){
 }
 
 func main() {
-	testtemp()
 	//tokentest()
 	//test()
-	intercomtest()
+	//intercomtest()
 
 	http.HandleFunc("/", Index)
 	http.HandleFunc("/wx", HandleWX)
