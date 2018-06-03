@@ -17,7 +17,7 @@ import (
 	"wechat"
 )
 
-const token string="token123"
+
 
 
 func Index(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +29,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 
 func makeSignature(timestamp string, nonce string) string {
-	sl := []string{token, timestamp, nonce}
+	sl := []string{wechat.TOKEN, timestamp, nonce}
 	sort.Strings(sl)
 	s := sha1.New()
 	io.WriteString(s, strings.Join(sl, ""))
@@ -163,9 +163,13 @@ func xmltest(){
 	fmt.Println(string(b))
 	os.Exit(0)
 }
-
+func tokentest(){
+	wechat.GetAccessToken()
+	os.Exit(0)
+}
 
 func main() {
+	tokentest()
 	//test()
 	http.HandleFunc("/", Index)
 	http.HandleFunc("/wx", HandleWX)

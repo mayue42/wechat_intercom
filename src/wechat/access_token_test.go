@@ -5,10 +5,11 @@ import (
 )
 
 func TestGetAccessToken(t *testing.T) {
-	token:=GetAccessToken()
-    if token=="" {        //测试函数
-        t.Error("error:token is null") // 如果不是如预期的那么就报错
+	token1:=GetAccessToken()
+	token2:=GetAccessToken()
+    if token1=="" || token2=="" || token1!=token2{
+        t.Error("error:token is null")
     } else {
-        t.Log("pass") //记录一些你期望记录的信息
+        t.Log("pass")
     }
 }
