@@ -15,10 +15,11 @@ import (
 	"os"
 	"time"
 	"wechat"
+	intercom "gopkg.in/intercom/intercom-go.v2"
 )
 
 
-
+var ic *intercom.Client=nil
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
@@ -102,7 +103,7 @@ func HandleWXPost(w http.ResponseWriter, r *http.Request){
 	fmt.Println(request)
 
 	reply:=ReplyData{}
-	reply.Content=CdataString{"test"}
+	reply.Content=CdataString{"信息已发出，请耐心等待回复"}
 	reply.CreateTime=(time.Now().Unix())
 	reply.FromUserName=request.ToUserName
 	reply.ToUserName=request.FromUserName
@@ -163,14 +164,33 @@ func xmltest(){
 	fmt.Println(string(b))
 	os.Exit(0)
 }
-func tokentest(){
-	wechat.GetAccessToken()
+func intercomtest(){
+	//ic = intercom.NewClient(myintercom.APP_ID,myintercom.ACCESS_TOKEN)
+	//convoList, err := intercom.ConversationService.ListAll(intercom.PageParams{})
+	//if(err!=nil){
+	//	fmt.Errorf(err.Error())
+	//}
+	//fmt.Println(convoList)
+	//os.Exit(0)
+}
+
+func testtemp(){
+	const open_id="oN4RB1qOBvrkwBi9diMYeqyXE0fc"
+	reply,err:=wechat.GetUserInfo(open_id)
+	if(err==nil && reply!=nil){
+		fmt.Println(reply)
+	}else{
+		fmt.Errorf(err.Error())
+	}
 	os.Exit(0)
 }
 
 func main() {
-	tokentest()
+	testtemp()
+	//tokentest()
 	//test()
+	intercomtest()
+
 	http.HandleFunc("/", Index)
 	http.HandleFunc("/wx", HandleWX)
 
