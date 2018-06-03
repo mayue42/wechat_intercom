@@ -40,8 +40,8 @@ type RequestData struct{
 	ToUserName string `xml:"ToUserName"`
 	FromUserName string `xml:"FromUserName"`
 	CreateTime int64 `xml:"CreateTime"`
-	MsgType xml.CharData `xml:"MsgType"`
-	Content xml.CharData `xml:"Content"`
+	MsgType CdataString `xml:"MsgType"`
+	Content CdataString `xml:"Content"`
 	MsgId string `xml:"MsgId"`
 }
 
@@ -142,8 +142,17 @@ func HandleWXPost(w http.ResponseWriter, r *http.Request){
 		}
 		fmt.Println(savedUser)
 		user_map[openid]=&User{user,savedUser.ID}
-
 	}
+
+	//msg := intercom.NewUserMessage(intercom.User{ID: user_map[openid].intercom_id}, request.Content.Value)
+	msg := intercom.NewUserMessage(intercom.User{ID: openid}, request.Content.Value)
+	savedMessage, err := ic.Messages.Save(&msg)
+	if(err!=nil){
+		fmt.Println(err.Error())
+		return
+	}
+	fmt.Println(savedMessage)
+	fmt.Print("message send to intercom suc")
 }
 
 func HandleWX(w http.ResponseWriter, r *http.Request) {
@@ -207,7 +216,8 @@ func intercomtest(){
 	}
 	fmt.Println(savedUser)
 
-	msg := intercom.NewUserMessage(intercom.User{Email: "test@example.com"}, "body123")
+	//msg := intercom.NewUserMessage(intercom.User{ID: savedUser.ID}, "body123")
+	msg := intercom.NewUserMessage(intercom.User{UserID: "27"}, "body123")
 	savedMessage, err := ic.Messages.Save(&msg)
 	if(err!=nil){
 		fmt.Println(err.Error())
