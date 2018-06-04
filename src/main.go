@@ -79,12 +79,16 @@ func HandleWXGet(w http.ResponseWriter, r *http.Request){
 		fmt.Fprintf(w, "parameter error")
 	}
 }
+
 type User struct{
 	wechat_user *wechat.UserInfoReply
 	intercom_user *intercom.User
 }
+
 var user_map =map[string]*User{}
-var ic = intercom.NewClient(myintercom.APP_ID,"")
+
+var ic = intercom.NewClient(myintercom.ACCESS_TOKEN,"")
+
 func HandleWXPost(w http.ResponseWriter, r *http.Request){
 	//check
 	if(r.Form==nil){
@@ -185,13 +189,9 @@ func HandleIntercomGet(w http.ResponseWriter, r *http.Request){
 
 
 func HandleIntercomPost(w http.ResponseWriter, r *http.Request){
-	//get content
-	//result, _:= ioutil.ReadAll(r.Body)
-	//r.Body.Close()
-	//fmt.Printf("%s\n", result)
-	//request:=intercom.Notification{}
-	//xml.Unmarshal([]byte(result),&request)
-	//fmt.Println(request)
+	// to do verify token
+
+	// get content
 	notif, err := intercom.NewNotification(r.Body)
 	if(err!=nil){
 		fmt.Println(err.Error())
@@ -213,61 +213,6 @@ func HandleIntercomPost(w http.ResponseWriter, r *http.Request){
 		fmt.Println(err.Error())
 	}
 
-
-	//reply:=ReplyData{}
-	//reply.Content=CdataString{"消息已收到，请耐心等待回复"}
-	//reply.CreateTime=(time.Now().Unix())
-	//reply.FromUserName=request.ToUserName
-	//reply.ToUserName=request.FromUserName
-	//reply.MsgType=CdataString{"text"}
-	//str,err:=xml.Marshal(reply)
-	//if(err!=nil){
-	//	fmt.Println("server data error")
-	//	return
-	//}
-	//w.Write(str)
-	////body := bytes.NewBuffer([]byte(str))
-	////fmt.Println(body)
-	////to do process
-	////fmt.Fprintf(w,body)
-	//openid:=request.FromUserName
-	//if(user_map[openid]==nil){
-	//	user,err:=wechat.GetUserInfo(openid)
-	//	if(err!=nil){
-	//		fmt.Println(err.Error())
-	//		return
-	//	}
-	//	itercom_user := intercom.User{
-	//		UserID: openid,
-	//		Name: user.NickName,
-	//		UpdatedAt: int64(time.Now().Unix()),
-	//
-	//		//CustomAttributes: map[string]interface{}{"is_cool": true},
-	//	}
-	//	savedUser, err := ic.Users.Save(&itercom_user)
-	//	if(err!=nil){
-	//		fmt.Println(err.Error())
-	//	}
-	//	fmt.Println(savedUser)
-	//	user_map[openid]=&User{user,&savedUser}
-	//
-	//	//msg := intercom.NewUserMessage(intercom.User{ID: user_map[openid].intercom_id}, request.Content.Value)
-	//	msg := intercom.NewUserMessage(intercom.User{UserID: openid}, request.Content.Value)
-	//	savedMessage, err := ic.Messages.Save(&msg)
-	//	if(err!=nil){
-	//		fmt.Println(err.Error())
-	//		return
-	//	}
-	//	fmt.Println(savedMessage)
-	//	fmt.Print("message send to intercom suc")
-	//}else{
-	//	c,err:=ic.Conversations.Reply("last", user_map[openid].intercom_user,intercom.CONVERSATION_COMMENT,request.Content.Value)
-	//	if(err!=nil){
-	//		fmt.Println(err.Error())
-	//		return
-	//	}
-	//	fmt.Println(c)
-	//}
 }
 
 
@@ -372,21 +317,9 @@ func intercomtest(){
 	fmt.Println(l)
 }
 
-func testtemp(){
-	const open_id="oN4RB1qOBvrkwBi9diMYeqyXE0fc"
-	reply,err:=wechat.GetUserInfo(open_id)
-	if(err==nil && reply!=nil){
-		fmt.Println(reply)
-	}else{
-		fmt.Errorf(err.Error())
-	}
-	os.Exit(0)
-}
 
 func main() {
-	//tokentest()
-	//test()
-	//intercomtest()
+	intercomtest()
 
 	http.HandleFunc("/", Index)
 	http.HandleFunc("/wx", HandleWX)

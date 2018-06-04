@@ -53,16 +53,7 @@ func refreshToken(){
 		}
 		reply:=AccessTokenReply{}
 		json.Unmarshal(body,&reply)
-		//fmt.Println(string(body))
-		//fmt.Println(reply.Access_token)
-		//fmt.Println(reply.Expires_in)
 		access_token.token=reply.Access_token
 		access_token.expire=reply.Expires_in+now
-		//fmt.Println(access_token.token)
-		//fmt.Println(access_token.expire)
-		//s,err:=json.Marshal(reply)
-		//if err==nil{
-		//	fmt.Println(string(s))
-		//}
 	}
 }

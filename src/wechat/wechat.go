@@ -99,7 +99,4 @@ func GetUserInfo(open_id string)(*UserInfoReply,error){
 	return &reply,nil
 }
 
-func MyPrint(){
-	fmt.Println("test")
-}
 
