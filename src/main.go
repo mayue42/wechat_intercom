@@ -200,19 +200,20 @@ func HandleIntercomPost(w http.ResponseWriter, r *http.Request){
 	fmt.Println(notif)
 	fmt.Println(notif.Conversation)
 
-	openid:=notif.Conversation.User.UserID
-	mss:=notif.Conversation.ConversationParts.Parts
-	text:=""
-	fmt.Println("message recieve:")
-	for _,ms:=range mss{
-		fmt.Println(ms.Body)
-		text+=(util.RemoveTag(ms.Body)+"\n")
+	if(notif.Topic=="conversation.admin.replied") {
+		openid := notif.Conversation.User.UserID
+		mss := notif.Conversation.ConversationParts.Parts
+		text := ""
+		fmt.Println("message recieve:")
+		for _, ms := range mss {
+			fmt.Println(ms.Body)
+			text += (util.RemoveTag(ms.Body) + "\n")
+		}
+		err = wechat.SendTextMessage(openid, text)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 	}
-	err=wechat.SendTextMessage(openid,text)
-	if err!=nil{
-		fmt.Println(err.Error())
-	}
-
 }
 
 
