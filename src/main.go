@@ -80,7 +80,7 @@ func HandleWXGet(w http.ResponseWriter, r *http.Request){
 }
 type User struct{
 	wechat_user *wechat.UserInfoReply
-	intercom_id string
+	intercom_user *intercom.User
 }
 var user_map =map[string]*User{}
 var ic = intercom.NewClient(myintercom.APP_ID,"")
@@ -107,7 +107,7 @@ func HandleWXPost(w http.ResponseWriter, r *http.Request){
 	fmt.Println(request)
 
 	reply:=ReplyData{}
-	reply.Content=CdataString{"信息已发出，请耐心等待回复"}
+	reply.Content=CdataString{"消息已收到，请耐心等待回复"}
 	reply.CreateTime=(time.Now().Unix())
 	reply.FromUserName=request.ToUserName
 	reply.ToUserName=request.FromUserName
@@ -141,18 +141,25 @@ func HandleWXPost(w http.ResponseWriter, r *http.Request){
 			fmt.Println(err.Error())
 		}
 		fmt.Println(savedUser)
-		user_map[openid]=&User{user,savedUser.ID}
-	}
+		user_map[openid]=&User{user,&savedUser}
 
-	//msg := intercom.NewUserMessage(intercom.User{ID: user_map[openid].intercom_id}, request.Content.Value)
-	msg := intercom.NewUserMessage(intercom.User{ID: openid}, request.Content.Value)
-	savedMessage, err := ic.Messages.Save(&msg)
-	if(err!=nil){
-		fmt.Println(err.Error())
-		return
+		//msg := intercom.NewUserMessage(intercom.User{ID: user_map[openid].intercom_id}, request.Content.Value)
+		msg := intercom.NewUserMessage(intercom.User{UserID: openid}, request.Content.Value)
+		savedMessage, err := ic.Messages.Save(&msg)
+		if(err!=nil){
+			fmt.Println(err.Error())
+			return
+		}
+		fmt.Println(savedMessage)
+		fmt.Print("message send to intercom suc")
+	}else{
+		c,err:=ic.Conversations.Reply("last", user_map[openid].intercom_user,intercom.CONVERSATION_COMMENT,"append message")
+		if(err!=nil){
+			fmt.Println(err.Error())
+			return
+		}
+		fmt.Println(c)
 	}
-	fmt.Println(savedMessage)
-	fmt.Print("message send to intercom suc")
 }
 
 func HandleWX(w http.ResponseWriter, r *http.Request) {
@@ -171,6 +178,21 @@ func HandleWX(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func HandleIntercom(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	fmt.Println(r)
+	fmt.Println("url:")
+	fmt.Println(r.URL)
+	fmt.Println("body:")
+	fmt.Println(r.Body)
+	fmt.Println("postform:")
+	fmt.Println(r.PostForm)
+	if(r.Method=="GET"){
+		HandleWXGet(w,r)
+	}else if(r.Method=="POST"){
+		HandleWXPost(w,r)
+	}
+}
 
 
 func xmltest(){
@@ -199,8 +221,11 @@ func xmltest(){
 	fmt.Println(string(b))
 	os.Exit(0)
 }
-func intercomtest(){
 
+
+
+func intercomtest(){
+	defer os.Exit(0)
 	fmt.Println(ic.AppID)
 	fmt.Println(ic.APIKey)
 	user := intercom.User{
@@ -216,20 +241,38 @@ func intercomtest(){
 	}
 	fmt.Println(savedUser)
 
+
+	//payload = struct{
+	//
+	//	'type': 'user',
+	//	'message_type': 'comment',
+	//	'user_id': user_id,
+	//	'body': body
+	//}
+	//resp = session.post(api('conversations/last/reply'), json=payload)
+
+
 	//msg := intercom.NewUserMessage(intercom.User{ID: savedUser.ID}, "body123")
 	msg := intercom.NewUserMessage(intercom.User{UserID: "27"}, "body123")
 	savedMessage, err := ic.Messages.Save(&msg)
+
 	if(err!=nil){
 		fmt.Println(err.Error())
 	}
 	fmt.Println(savedMessage)
+
+	c,err:=ic.Conversations.Reply("last", &savedUser,intercom.CONVERSATION_COMMENT,"append message")
+	if(err!=nil){
+		fmt.Println(err.Error())
+		return
+	}
+	fmt.Println(c)
 
 	l,err:=ic.Conversations.ListAll(intercom.PageParams{})
 		if(err!=nil){
 		fmt.Println(err.Error())
 	}
 	fmt.Println(l)
-	os.Exit(0)
 }
 
 func testtemp(){
@@ -246,10 +289,11 @@ func testtemp(){
 func main() {
 	//tokentest()
 	//test()
-	//intercomtest()
+	intercomtest()
 
 	http.HandleFunc("/", Index)
 	http.HandleFunc("/wx", HandleWX)
+	http.HandleFunc("/intercom",HandleIntercom)
 
 	fmt.Println("listen on port 80")
 	err := http.ListenAndServe(":80", nil);
