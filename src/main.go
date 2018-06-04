@@ -319,7 +319,7 @@ func intercomtest(){
 
 
 func main() {
-	intercomtest()
+	//intercomtest()
 
 	http.HandleFunc("/", Index)
 	http.HandleFunc("/wx", HandleWX)
