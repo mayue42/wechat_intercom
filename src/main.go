@@ -185,12 +185,30 @@ func HandleIntercomGet(w http.ResponseWriter, r *http.Request){
 
 func HandleIntercomPost(w http.ResponseWriter, r *http.Request){
 	//get content
-	result, _:= ioutil.ReadAll(r.Body)
-	r.Body.Close()
-	fmt.Printf("%s\n", result)
-	request:=RequestData{}
-	xml.Unmarshal([]byte(result),&request)
-	fmt.Println(request)
+	//result, _:= ioutil.ReadAll(r.Body)
+	//r.Body.Close()
+	//fmt.Printf("%s\n", result)
+	//request:=intercom.Notification{}
+	//xml.Unmarshal([]byte(result),&request)
+	//fmt.Println(request)
+	notif, err := intercom.NewNotification(r.Body)
+	if(err!=nil){
+		fmt.Println(err.Error())
+		return
+	}
+	fmt.Println(notif)
+	fmt.Println(notif.Conversation)
+
+	openid:=notif.Conversation.User.UserID
+	mss:=notif.Conversation.ConversationParts.Parts
+	text:=""
+	for _,ms:=range mss{
+		text+=(ms.Body+"\n")
+	}
+	err=wechat.SendTextMessage(openid,text)
+	if err!=nil{
+		fmt.Println(err.Error())
+	}
 
 
 	//reply:=ReplyData{}
