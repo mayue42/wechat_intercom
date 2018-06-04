@@ -17,6 +17,7 @@ import (
 	"wechat"
 	intercom "gopkg.in/intercom/intercom-go.v2"
 	myintercom "intercom"
+	"util"
 )
 
 
@@ -202,8 +203,10 @@ func HandleIntercomPost(w http.ResponseWriter, r *http.Request){
 	openid:=notif.Conversation.User.UserID
 	mss:=notif.Conversation.ConversationParts.Parts
 	text:=""
+	fmt.Println("message recieve:")
 	for _,ms:=range mss{
-		text+=(ms.Body+"\n")
+		fmt.Println(ms.Body)
+		text+=(util.RemoveTag(ms.Body)+"\n")
 	}
 	err=wechat.SendTextMessage(openid,text)
 	if err!=nil{
