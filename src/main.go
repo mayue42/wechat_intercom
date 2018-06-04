@@ -153,7 +153,7 @@ func HandleWXPost(w http.ResponseWriter, r *http.Request){
 		fmt.Println(savedMessage)
 		fmt.Print("message send to intercom suc")
 	}else{
-		c,err:=ic.Conversations.Reply("last", user_map[openid].intercom_user,intercom.CONVERSATION_COMMENT,"append message")
+		c,err:=ic.Conversations.Reply("last", user_map[openid].intercom_user,intercom.CONVERSATION_COMMENT,request.Content.Value)
 		if(err!=nil){
 			fmt.Println(err.Error())
 			return
