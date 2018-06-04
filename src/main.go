@@ -178,6 +178,79 @@ func HandleWX(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func HandleIntercomGet(w http.ResponseWriter, r *http.Request){
+
+}
+
+
+func HandleIntercomPost(w http.ResponseWriter, r *http.Request){
+	//get content
+	result, _:= ioutil.ReadAll(r.Body)
+	r.Body.Close()
+	fmt.Printf("%s\n", result)
+	request:=RequestData{}
+	xml.Unmarshal([]byte(result),&request)
+	fmt.Println(request)
+
+
+	//reply:=ReplyData{}
+	//reply.Content=CdataString{"消息已收到，请耐心等待回复"}
+	//reply.CreateTime=(time.Now().Unix())
+	//reply.FromUserName=request.ToUserName
+	//reply.ToUserName=request.FromUserName
+	//reply.MsgType=CdataString{"text"}
+	//str,err:=xml.Marshal(reply)
+	//if(err!=nil){
+	//	fmt.Println("server data error")
+	//	return
+	//}
+	//w.Write(str)
+	////body := bytes.NewBuffer([]byte(str))
+	////fmt.Println(body)
+	////to do process
+	////fmt.Fprintf(w,body)
+	//openid:=request.FromUserName
+	//if(user_map[openid]==nil){
+	//	user,err:=wechat.GetUserInfo(openid)
+	//	if(err!=nil){
+	//		fmt.Println(err.Error())
+	//		return
+	//	}
+	//	itercom_user := intercom.User{
+	//		UserID: openid,
+	//		Name: user.NickName,
+	//		UpdatedAt: int64(time.Now().Unix()),
+	//
+	//		//CustomAttributes: map[string]interface{}{"is_cool": true},
+	//	}
+	//	savedUser, err := ic.Users.Save(&itercom_user)
+	//	if(err!=nil){
+	//		fmt.Println(err.Error())
+	//	}
+	//	fmt.Println(savedUser)
+	//	user_map[openid]=&User{user,&savedUser}
+	//
+	//	//msg := intercom.NewUserMessage(intercom.User{ID: user_map[openid].intercom_id}, request.Content.Value)
+	//	msg := intercom.NewUserMessage(intercom.User{UserID: openid}, request.Content.Value)
+	//	savedMessage, err := ic.Messages.Save(&msg)
+	//	if(err!=nil){
+	//		fmt.Println(err.Error())
+	//		return
+	//	}
+	//	fmt.Println(savedMessage)
+	//	fmt.Print("message send to intercom suc")
+	//}else{
+	//	c,err:=ic.Conversations.Reply("last", user_map[openid].intercom_user,intercom.CONVERSATION_COMMENT,request.Content.Value)
+	//	if(err!=nil){
+	//		fmt.Println(err.Error())
+	//		return
+	//	}
+	//	fmt.Println(c)
+	//}
+}
+
+
+
 func HandleIntercom(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	fmt.Println(r)
@@ -188,11 +261,14 @@ func HandleIntercom(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("postform:")
 	fmt.Println(r.PostForm)
 	if(r.Method=="GET"){
-		HandleWXGet(w,r)
+		HandleIntercomGet(w,r)
 	}else if(r.Method=="POST"){
-		HandleWXPost(w,r)
+		HandleIntercomPost(w,r)
 	}
 }
+
+
+
 
 
 func xmltest(){
@@ -289,7 +365,7 @@ func testtemp(){
 func main() {
 	//tokentest()
 	//test()
-	intercomtest()
+	//intercomtest()
 
 	http.HandleFunc("/", Index)
 	http.HandleFunc("/wx", HandleWX)
