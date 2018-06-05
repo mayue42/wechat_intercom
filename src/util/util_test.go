@@ -28,5 +28,8 @@ func TestRemoveTag(t *testing.T) {
 	reRemoveCompare(t,"<p>test1<br/>test2</p>","test1\ntest2\n")
 	reRemoveCompare(t,"<p>test1</p><p>test2</p>","test1\ntest2\n")
 
+
+	reRemoveCompare(t,"<abc/>","")
+	reRemoveCompare(t,"<abc>","")
 }
 
