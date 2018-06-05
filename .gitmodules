@@ -4,3 +4,6 @@
 [submodule "src/gopkg.in/intercom/intercom-go.v2"]
 	path = src/gopkg.in/intercom/intercom-go.v2
 	url = https://gopkg.in/intercom/intercom-go.v2
+[submodule "src/github.com/pborman/uuid"]
+	path = src/github.com/pborman/uuid
+	url = git@github.com:pborman/uuid.git
