@@ -4,10 +4,17 @@ import (
 	"regexp"
 )
 
+func RemoveTagClosure() func(string)string{
+	var tag_br = regexp.MustCompile(`(<br>)|(<br/>)|(<BR>)|(<BR/>)`)
+	var tag_p = regexp.MustCompile(`<[pP]>([^<]*)</[pP]>`)
+	//var tags = regexp.MustCompile(`<\s*/?\s*[a-zA-Z0-9]+.*?>`)
 
-
-func RemoveTag(htmlstring string)string{
-	//var r = regexp.MustCompile("<\\s*/?\\s*[a-zA-Z0-9]+.*?>")
-	var r = regexp.MustCompile(`<\s*/?\s*[a-zA-Z0-9]+.*?>`)
-	return r.ReplaceAllString(htmlstring, "")
+	replace :=func (htmlstring string)string{
+		htmlstring = tag_br.ReplaceAllString(htmlstring, "\n")
+		htmlstring = tag_p.ReplaceAllString(htmlstring, "$1\n")
+		return htmlstring
+	}
+	return replace
 }
+
+var RemoveTag = RemoveTagClosure()
