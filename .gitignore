@@ -1,5 +1,6 @@
 .idea/
 pkg/
-
-
+bin/
+src/github.com/google/gops/
+src/github.com/stretchr/
 
