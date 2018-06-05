@@ -7,6 +7,8 @@ const APP_SECRET = "0117c4dfa79fb058177deea13e8c025d"
 
 const TOKEN = "token123"
 
+const AUTO_REPLY = false
+
 var TOKEN_URL = fmt.Sprintf("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s",APP_ID, APP_SECRET)
 
 const STAFF_ADD_URL = "https://api.weixin.qq.com/customservice/kfaccount/add?access_token=%s"

@@ -111,22 +111,21 @@ func HandleWXPost(w http.ResponseWriter, r *http.Request){
 	xml.Unmarshal([]byte(result),&request)
 	fmt.Println(request)
 
-	reply:=ReplyData{}
-	reply.Content=CdataString{"消息已收到，请耐心等待回复"}
-	reply.CreateTime=(time.Now().Unix())
-	reply.FromUserName=request.ToUserName
-	reply.ToUserName=request.FromUserName
-	reply.MsgType=CdataString{"text"}
-	str,err:=xml.Marshal(reply)
-	if(err!=nil){
-		fmt.Println("server data error")
-		return
+	if(wechat.AUTO_REPLY) {
+		reply := ReplyData{}
+		reply.Content = CdataString{"消息已收到，请耐心等待回复"}
+		reply.CreateTime = (time.Now().Unix())
+		reply.FromUserName = request.ToUserName
+		reply.ToUserName = request.FromUserName
+		reply.MsgType = CdataString{"text"}
+		str, err := xml.Marshal(reply)
+		if (err != nil) {
+			fmt.Println("server data error")
+			return
+		}
+		w.Write(str)
 	}
-	w.Write(str)
-	//body := bytes.NewBuffer([]byte(str))
-	//fmt.Println(body)
-	//to do process
-	//fmt.Fprintf(w,body)
+
 	openid:=request.FromUserName
 	if(user_map[openid]==nil){
 		user,err:=wechat.GetUserInfo(openid)
