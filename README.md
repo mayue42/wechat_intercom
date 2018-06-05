@@ -1,4 +1,4 @@
-### set up:
+### set up
 
 ```bash
 git clone --recursive git@github.com:mayue42/wechat_intercom.git
@@ -24,7 +24,7 @@ or(obsolete now)
 
 ---
 
-### settings:
+### settings
 
 src\intercom\intercom_setting.go
 
