@@ -1,7 +1,7 @@
 ### set up:
 
 ```bash
-git clone --recursive
+git clone --recursive git@github.com:mayue42/wechat_intercom.git
 ```
 
 
@@ -22,6 +22,7 @@ or(obsolete now)
 
 ~~popd~~
 
+---
 
 ### settings:
 
@@ -29,3 +30,4 @@ src\intercom\intercom_setting.go
 
 src\wechat\wechat_setting.go
 
+---
