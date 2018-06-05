@@ -1,5 +1,7 @@
 ### set up:
 
+or git clone --recursive
+
 go get gopkg.in/intercom/intercom-go.v2
 
 mkdir -p src/github.com/pborman
