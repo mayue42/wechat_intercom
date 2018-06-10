@@ -6,79 +6,17 @@ import (
 	"net/http"
 	"log"
 
-	"sort"
-	"crypto/sha1"
-	"io"
-	"strings"
 	"io/ioutil"
 	"encoding/xml"
 	"os"
 	"time"
 	"wechat"
-	intercom "gopkg.in/intercom/intercom-go.v2"
+	"gopkg.in/intercom/intercom-go.v2"
 	myintercom "intercom"
 	"util"
 )
 
 
-func Index(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	fmt.Println(r.RequestURI)
-	fmt.Println(r)
-	fmt.Fprintf(w, "hello")
-}
-
-
-func makeSignature(timestamp string, nonce string) string {
-	sl := []string{wechat.TOKEN, timestamp, nonce}
-	sort.Strings(sl)
-	s := sha1.New()
-	io.WriteString(s, strings.Join(sl, ""))
-	return fmt.Sprintf("%x", s.Sum(nil))
-}
-type RequestData struct{
-	XMLName xml.Name `xml:"xml"`
-	ToUserName string `xml:"ToUserName"`
-	FromUserName string `xml:"FromUserName"`
-	CreateTime int64 `xml:"CreateTime"`
-	MsgType CdataString `xml:"MsgType"`
-	Content CdataString `xml:"Content"`
-	MsgId string `xml:"MsgId"`
-}
-
-
-type CdataString struct {
-	Value string `xml:",cdata"`
-}
-
-
-type ReplyData struct {
-	XMLName xml.Name `xml:"xml"`
-	ToUserName string `xml:"ToUserName"`
-	FromUserName string `xml:"FromUserName"`
-	CreateTime int64 `xml:"CreateTime"`
-	MsgType CdataString `xml:"MsgType"`
-	Content CdataString `xml:"Content"`
-}
-
-
-//http://127.0.0.1/wx?signature=c1204eef817136c24000e43cbdc5851e8bfead92&echostr=aaa&timestamp=1527827016&nonce=3943144772
-func HandleWXGet(w http.ResponseWriter, r *http.Request){
-	if(r.Form==nil){
-		fmt.Fprintf(w, "parameter need")
-	}
-	signature:= r.Form.Get("signature")
-	timestamp:= r.Form.Get("timestamp")
-	nonce := r.Form.Get("nonce")
-	echostr := r.Form.Get("echostr")
-
-	hashcode := makeSignature(timestamp,nonce)
-	if hashcode == signature{
-		fmt.Fprintf(w,echostr)
-	}else {
-		fmt.Fprintf(w, "parameter error")
-	}
-}
 
 type User struct{
 	wechat_user *wechat.UserInfoReply
@@ -89,17 +27,29 @@ var user_map =map[string]*User{}
 
 var ic = intercom.NewClient(myintercom.ACCESS_TOKEN,"")
 
+
+
+func Index(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r)
+	fmt.Fprintf(w, "hello")
+}
+
+
+func HandleWXGet(w http.ResponseWriter, r *http.Request){
+	if err:=wechat.ValidateRequest(r); err!=nil{
+		fmt.Fprint(w, err.Error())
+		return
+	}
+
+	echostr := r.Form.Get("echostr")
+	fmt.Fprint(w,echostr)
+}
+
+
 func HandleWXPost(w http.ResponseWriter, r *http.Request){
 	//check
-	if(r.Form==nil){
-		fmt.Fprintf(w, "parameter need")
-	}
-	signature:= r.Form.Get("signature")
-	timestamp:= r.Form.Get("timestamp")
-	nonce := r.Form.Get("nonce")
-	hashcode := makeSignature(timestamp,nonce)
-	if hashcode != signature{
-		fmt.Fprintf(w, "parameter error")
+	if err:=wechat.ValidateRequest(r); err!=nil{
+		fmt.Fprint(w, err.Error())
 		return
 	}
 
@@ -107,17 +57,17 @@ func HandleWXPost(w http.ResponseWriter, r *http.Request){
 	result, _:= ioutil.ReadAll(r.Body)
 	r.Body.Close()
 	fmt.Printf("%s\n", result)
-	request:=RequestData{}
+	request:=wechat.RequestData{}
 	xml.Unmarshal([]byte(result),&request)
 	fmt.Println(request)
 
 	if(wechat.AUTO_REPLY) {
-		reply := ReplyData{}
-		reply.Content = CdataString{"消息已收到，请耐心等待回复"}
+		reply := wechat.ReplyData{}
+		reply.Content = wechat.CdataString{"消息已收到，请耐心等待回复"}
 		reply.CreateTime = (time.Now().Unix())
 		reply.FromUserName = request.ToUserName
 		reply.ToUserName = request.FromUserName
-		reply.MsgType = CdataString{"text"}
+		reply.MsgType = wechat.CdataString{"text"}
 		str, err := xml.Marshal(reply)
 		if (err != nil) {
 			fmt.Println("server data error")
@@ -232,38 +182,6 @@ func HandleIntercom(w http.ResponseWriter, r *http.Request) {
 		HandleIntercomPost(w,r)
 	}
 }
-
-
-
-
-
-func xmltest(){
-	str:="<xml><ToUserName><![CDATA[gh_1ce6b93e2b4d]]></ToUserName>"+
-	"<FromUserName><![CDATA[oN4RB1qOBvrkwBi9diMYeqyXE0fc]]></FromUserName>"+
-	"<CreateTime>1527834515</CreateTime>"+
-	"<MsgType><![CDATA[text]]></MsgType>"+
-	"<Content><![CDATA[ooooooooooooooooooooooo]]></Content>"+
-	"<MsgId>6561999276080967450</MsgId>"+
-	"</xml>"
-	request:=RequestData{}
-	xml.Unmarshal([]byte(str),&request)
-	fmt.Println(request)
-
-	reply:=ReplyData{}
-	reply.Content=CdataString{"test"}
-	reply.CreateTime=(time.Now().Unix())
-	reply.FromUserName=request.ToUserName
-	reply.ToUserName=request.FromUserName
-	reply.MsgType=CdataString{"text"}
-	b,err:=xml.MarshalIndent(reply,"","")
-	if(err!=nil){
-		fmt.Println("server data error")
-		return
-	}
-	fmt.Println(string(b))
-	os.Exit(0)
-}
-
 
 
 func intercomtest(){

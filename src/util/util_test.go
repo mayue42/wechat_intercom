@@ -2,8 +2,6 @@ package util
 
 import (
 "testing"
-	"regexp"
-	"fmt"
 )
 
 func reRemoveCompare(t *testing.T,origin string, expect string)  {
@@ -16,9 +14,6 @@ func reRemoveCompare(t *testing.T,origin string, expect string)  {
 }
 
 func TestRemoveTag(t *testing.T) {
-	text := `Hello 世界！123 Go.`
-	reg := regexp.MustCompile(`(Hello)(.*)(Go)`)
-	fmt.Printf("%q\n", reg.ReplaceAllString(text, "$3$2$1"))
 	reRemoveCompare(t,"<br>","\n")
 	reRemoveCompare(t,"<br/>","\n")
 	reRemoveCompare(t,"<BR>","\n")
