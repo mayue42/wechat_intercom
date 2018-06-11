@@ -2,14 +2,14 @@ package intercom
 
 import (
 	"fmt"
-	"gopkg.in/intercom/intercom-go.v2"
+	vendor_intercom "gopkg.in/intercom/intercom-go.v2"
 	"time"
 	"testing"
 )
 
 func TestIntercom(t *testing.T){
-	var ic = intercom.NewClient(ACCESS_TOKEN,"")
-	user := intercom.User{
+	var ic = vendor_intercom.NewClient(ACCESS_TOKEN,"")
+	user := vendor_intercom.User{
 		UserID: "27",
 		Email: "test@example.com",
 		Name: "InterGopher",
@@ -35,7 +35,7 @@ func TestIntercom(t *testing.T){
 
 
 	//msg := intercom.NewUserMessage(intercom.User{ID: savedUser.ID}, "body123")
-	msg := intercom.NewUserMessage(intercom.User{UserID: "27"}, "body123")
+	msg := vendor_intercom.NewUserMessage(vendor_intercom.User{UserID: "27"}, "body123")
 	savedMessage, err := ic.Messages.Save(&msg)
 	if(err!=nil){
 		t.Error(err)
@@ -43,7 +43,7 @@ func TestIntercom(t *testing.T){
 	}
 	fmt.Println(savedMessage)
 
-	c,err:=ic.Conversations.Reply("last", &savedUser,intercom.CONVERSATION_COMMENT,"append message")
+	c,err:=ic.Conversations.Reply("last", &savedUser,vendor_intercom.CONVERSATION_COMMENT,"append message")
 	if(err!=nil){
 		t.Error(err)
 		return
@@ -56,4 +56,15 @@ func TestIntercom(t *testing.T){
 	//	return
 	//}
 	//fmt.Println(l)
+}
+
+func TestFindExistUser(t *testing.T)  {
+	ic := vendor_intercom.NewClient(ACCESS_TOKEN,"")
+	openid:="27"
+	user,err:=ic.Users.FindByUserID(openid)
+	if(err!=nil){
+		t.Errorf("User not find: %s",err)
+	}else if(user.UserID!="27"){
+		t.Errorf("UserId do not match: %s",user.UserID)
+	}
 }

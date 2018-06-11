@@ -28,6 +28,32 @@ func HandleWXGet(w http.ResponseWriter, r *http.Request){
 	fmt.Fprint(w,echostr)
 }
 
+func createIntercomUser(openid string)error{
+	//get user info from wechat
+	wechat_user, err := wechat.GetUserInfo(openid)
+	if (err != nil) {
+		return err
+	}
+
+	//convert data struct
+	intercom_user := intercom.User{
+		UserID: openid,
+		Name: wechat_user.NickName,
+		UpdatedAt: int64(time.Now().Unix()),
+	}
+
+	//create user in intercom
+	ic := intercom.NewClient(myintercom.ACCESS_TOKEN,"")
+	savedUser, err := ic.Users.Save(&intercom_user)
+	if (err != nil) {
+		return err
+	}
+
+	//update user_map
+	user_map[openid] = &User{wechat_user, &savedUser}
+	return nil
+}
+
 
 func HandleWXPost(w http.ResponseWriter, r *http.Request){
 	//check
@@ -61,43 +87,36 @@ func HandleWXPost(w http.ResponseWriter, r *http.Request){
 
 	ic := intercom.NewClient(myintercom.ACCESS_TOKEN,"")
 	openid:=request.FromUserName.Value
+
 	if(user_map[openid]==nil){
-		user,err:=wechat.GetUserInfo(openid)
-		if(err!=nil){
-			fmt.Println(err.Error())
+		item_user,err:=ic.Users.FindByUserID(openid)
+		if(err==nil) {
+			user_map[openid]=&User{nil,&item_user}
+		}else{
+			//create new user
+			if err:=createIntercomUser(openid); err!=nil{
+				fmt.Printf("Error: new intercom user create: %s",err)
+				return
+			}
+			//send message
+			msg := intercom.NewUserMessage(intercom.User{UserID: openid}, request.Content.Value)
+			savedMessage, err := ic.Messages.Save(&msg)
+			if (err != nil) {
+				fmt.Printf("Error: create msg to intercom: %s", err)
+				return
+			}
+			fmt.Printf("message send to intercom suc: %s",savedMessage)
 			return
 		}
-		itercom_user := intercom.User{
-			UserID: openid,
-			Name: user.NickName,
-			UpdatedAt: int64(time.Now().Unix()),
-
-			//CustomAttributes: map[string]interface{}{"is_cool": true},
-		}
-		savedUser, err := ic.Users.Save(&itercom_user)
-		if(err!=nil){
-			fmt.Println(err.Error())
-		}
-		fmt.Println(savedUser)
-		user_map[openid]=&User{user,&savedUser}
-
-		//msg := intercom.NewUserMessage(intercom.User{ID: user_map[openid].intercom_id}, request.Content.Value)
-		msg := intercom.NewUserMessage(intercom.User{UserID: openid}, request.Content.Value)
-		savedMessage, err := ic.Messages.Save(&msg)
-		if(err!=nil){
-			fmt.Println(err.Error())
-			return
-		}
-		fmt.Println(savedMessage)
-		fmt.Print("message send to intercom suc")
-	}else{
-		c,err:=ic.Conversations.Reply("last", user_map[openid].intercom_user,intercom.CONVERSATION_COMMENT,request.Content.Value)
-		if(err!=nil){
-			fmt.Println(err.Error())
-			return
-		}
-		fmt.Println(c)
 	}
+
+	//conversition already exist
+	c,err:=ic.Conversations.Reply("last", intercom.User{UserID: openid}, intercom.CONVERSATION_COMMENT,request.Content.Value)
+	if(err!=nil){
+		fmt.Printf("Error: reply conversation to intercom: %s", err)
+		return
+	}
+	fmt.Printf("message send to intercom suc: %s",c)
 }
 
 func HandleWX(w http.ResponseWriter, r *http.Request) {
