@@ -14,8 +14,8 @@ import (
 
 type RequestData struct{
 	XMLName xml.Name `xml:"xml"`
-	ToUserName string `xml:"ToUserName"`
-	FromUserName string `xml:"FromUserName"`
+	ToUserName CdataString `xml:"ToUserName"`
+	FromUserName CdataString `xml:"FromUserName"`
 	CreateTime int64 `xml:"CreateTime"`
 	MsgType CdataString `xml:"MsgType"`
 	Content CdataString `xml:"Content"`
@@ -30,8 +30,8 @@ type CdataString struct {
 
 type ReplyData struct {
 	XMLName xml.Name `xml:"xml"`
-	ToUserName string `xml:"ToUserName"`
-	FromUserName string `xml:"FromUserName"`
+	ToUserName CdataString `xml:"ToUserName"`
+	FromUserName CdataString `xml:"FromUserName"`
 	CreateTime int64 `xml:"CreateTime"`
 	MsgType CdataString `xml:"MsgType"`
 	Content CdataString `xml:"Content"`

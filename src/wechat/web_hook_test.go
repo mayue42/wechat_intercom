@@ -6,11 +6,7 @@ import (
 	"net/url"
 	"encoding/xml"
 	"fmt"
-	"time"
-	"os"
 )
-
-
 
 
 func TestRequestData(t *testing.T){
@@ -23,24 +19,44 @@ func TestRequestData(t *testing.T){
 		"</xml>"
 	request:=RequestData{}
 	xml.Unmarshal([]byte(str),&request)
-	request.ToUserName==""
-
+	if request.ToUserName.Value!="gh_1ce6b93e2b4d"{
+		t.Error("ToUserName Not Equal")
+	}
+	if request.FromUserName.Value!="oN4RB1qOBvrkwBi9diMYeqyXE0fc"{
+		t.Error("FromUserName Not Equal")
+	}
+	if request.CreateTime!=1527834515{
+		t.Error("CreateTime Not Equal")
+	}
+	if request.MsgType.Value!="text"{
+		t.Error("MsgType Not Equal")
+	}
+	if request.Content.Value!="ooooooooooooooooooooooo"{
+		t.Error("Content Not Equal")
+	}
+	if request.MsgId!="6561999276080967450"{
+		t.Error("MsgId Not Equal")
+	}
 }
+
 
 func TestReplyData(t *testing.T) {
 	reply:=ReplyData{}
 	reply.Content=CdataString{"test"}
-	reply.CreateTime=(time.Now().Unix())
-	reply.FromUserName="admin001"
-	reply.ToUserName="user001"
+	reply.CreateTime=1528704441
+	reply.FromUserName.Value="admin001"
+	reply.ToUserName.Value="user001"
 	reply.MsgType=CdataString{"text"}
+	target:=`<xml><ToUserName><![CDATA[user001]]></ToUserName><FromUserName><![CDATA[admin001]]></FromUserName><CreateTime>1528704441</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[test]]></Content></xml>`
 	b,err:=xml.MarshalIndent(reply,"","")
 	if(err!=nil){
-		fmt.Println("server data error")
+		t.Error("reply Marshal error")
 		return
 	}
-	fmt.Println(string(b))
-	os.Exit(0)
+	if(string(b)!=target){
+		fmt.Print(string(b))
+		t.Error("string after MarshalIndent is not right")
+	}
 }
 
 
