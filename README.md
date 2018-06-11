@@ -2,7 +2,11 @@
 
 This repository connect **wechat public account** and intercom.
 
-When client ask question via wechat public account, the message will be forward to intercom. Then the company can reply client via intercom, the reply message will be forward to wechat client.
+When client ask question via wechat public account, the message will be forward to intercom. 
+
+Then the company can reply client via intercom, the reply message will be forward to wechat client.
+
+---
 
 ### Setup
 
@@ -34,6 +38,8 @@ popd
 
 ### Settings
 
+This two files need to change accrodingly.
+
 src\intercom\intercom_setting.go
 
 src\wechat\wechat_setting.go
@@ -52,5 +58,6 @@ sudo ./main.go
 
 ### Related
 
-the following repository connect **wechat personal** account and intercom
+the following repository connect **wechat personal account** and intercom:
+
 https://github.com/richardchien/wechat-intercom
