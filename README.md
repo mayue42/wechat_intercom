@@ -1,3 +1,9 @@
+### Introduction
+
+This repository connect **wechat public account** and intercom.
+
+When client ask question via wechat public account, the message will be forward to intercom. Then the company can reply client via intercom, the reply message will be forward to wechat client.
+
 ### Setup
 
 ```bash
@@ -41,3 +47,10 @@ export $GOPATH=`pwd`
 go build src/main.go
 sudo ./main.go 
 ```
+
+---
+
+### Related
+
+the following repository connect **wechat personal** account and intercom
+https://github.com/richardchien/wechat-intercom
