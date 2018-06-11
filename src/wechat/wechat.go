@@ -53,7 +53,8 @@ func SendTextMessage(open_id string, message string)error{
 	content.MsgType="text"
 	str,err:=json.Marshal(content)
 	//resp,err:=http.Post(url,"application/json",strings.NewReader(string(str)))
-	resp,err:=http.Post(url,"application/json",bytes.NewBuffer(str))
+	//resp,err:=http.Post(url,"application/json",bytes.NewBuffer(str))
+	resp,err:=http.Post(url,"application/json",bytes.NewReader(str))
 	if(err!=nil){
 		fmt.Errorf(err.Error())
 		return err
@@ -88,15 +89,23 @@ func GetUserInfo(open_id string)(*UserInfoReply,error){
 		return nil,err
 	}
 	fmt.Println(string(body))
-	reply:=UserInfoReply{}
-	err=json.Unmarshal(body,&reply)
-	fmt.Println(reply)
-	if(err!=nil){
-		fmt.Println("Unmarshal error")
-		fmt.Println(err.Error())
-		return nil,err
+	if bytes.Contains(body, []byte("errmsg")) {
+		reply:=Reply{}
+		json.Unmarshal(body,&reply)
+		err_str:=fmt.Sprintf("error:%d;%s",reply.ErrCode,reply.ErrMsg)
+		fmt.Println(err_str)
+		return nil,errors.New(err_str)
+	} else {
+		reply := UserInfoReply{}
+		err = json.Unmarshal(body, &reply)
+		fmt.Println(reply)
+		if (err != nil) {
+			fmt.Println("Unmarshal error")
+			fmt.Println(err.Error())
+			return nil, err
+		}
+		return &reply, nil
 	}
-	return &reply,nil
 }
 
 

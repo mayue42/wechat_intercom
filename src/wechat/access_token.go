@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"encoding/json"
+	"bytes"
 )
 
 type AccessToken struct {
@@ -44,16 +45,27 @@ func refreshToken(){
 		if(err!=nil){
 			fmt.Println("error")
 			fmt.Errorf(err.Error())
+			return
 		}
 		defer resp.Body.Close()
 		body,err:=ioutil.ReadAll(resp.Body)
 		if(err!=nil){
 			fmt.Println("error")
 			fmt.Errorf(err.Error())
+			return
 		}
-		reply:=AccessTokenReply{}
-		json.Unmarshal(body,&reply)
-		access_token.token=reply.Access_token
-		access_token.expire=reply.Expires_in+now
+		if bytes.Contains(body, []byte("errmsg")) {
+			reply:=Reply{}
+			json.Unmarshal(body,&reply)
+			fmt.Printf("error:%d;%s",reply.ErrCode,reply.ErrMsg)
+			fmt.Errorf("%d;%s",reply.ErrCode,reply.ErrMsg)
+			return
+		} else {
+			reply:=AccessTokenReply{}
+			json.Unmarshal(body,&reply)
+			access_token.token=reply.Access_token
+			access_token.expire=reply.Expires_in+now
+		}
+
 	}
 }
