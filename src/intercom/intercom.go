@@ -2,16 +2,17 @@ package intercom
 
 import (
 	"crypto/hmac"
-	"crypto/sha256"
 	"encoding/hex"
 	"net/http"
 	"errors"
 	"io/ioutil"
+	"fmt"
+	"crypto/sha1"
 )
 
 func makeSignature(message []byte, secret string) string {
     key := []byte(secret)
-    h := hmac.New(sha256.New, key)
+    h := hmac.New(sha1.New, key)
     h.Write(message)
     return hex.EncodeToString(h.Sum(nil))
 }
@@ -28,10 +29,12 @@ func ValidateRequest(r *http.Request) error {
 	if(sign==""){
 		return errors.New("X-Hub-Signature Not find")
 	}
-	if(len(sign)!=44){
+	if(len(sign)!=45){
 		return errors.New("X-Hub-Signature not accecpt ")
 	}
 	if hashcode != sign[5:] {
+		fmt.Println(hashcode)
+		fmt.Println(sign[5:])
 		return errors.New("hash value not match")
 	}
 	return nil
