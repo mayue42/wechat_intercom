@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"fmt"
 	"crypto/sha1"
+	"bytes"
 )
 
 func makeSignature(message []byte, secret string) string {
@@ -19,11 +20,14 @@ func makeSignature(message []byte, secret string) string {
 
 
 func ValidateRequest(r *http.Request) error {
-	body,err:=ioutil.ReadAll(r.Body) // if read body here, than no data to read later
+    bodyBytes, err := ioutil.ReadAll(r.Body)
 	if(err!=nil){
 		return errors.New("Payload Reading Error")
 	}
-	hashcode := makeSignature(body,HUB_SECRET)
+    //reset the response body to the original unread state
+    r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	hashcode := makeSignature(bodyBytes,HUB_SECRET)
 
 	sign:= r.Header.Get("X-Hub-Signature")
 	if(sign==""){
