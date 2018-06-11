@@ -59,7 +59,7 @@ func HandleWXPost(w http.ResponseWriter, r *http.Request){
 		w.Write(str)
 	}
 
-	var ic = intercom.NewClient(myintercom.ACCESS_TOKEN,"")
+	ic := intercom.NewClient(myintercom.ACCESS_TOKEN,"")
 	openid:=request.FromUserName.Value
 	if(user_map[openid]==nil){
 		user,err:=wechat.GetUserInfo(openid)

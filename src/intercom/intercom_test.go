@@ -9,8 +9,6 @@ import (
 
 func TestIntercom(t *testing.T){
 	var ic = intercom.NewClient(ACCESS_TOKEN,"")
-	fmt.Println(ic.AppID)
-	fmt.Println(ic.APIKey)
 	user := intercom.User{
 		UserID: "27",
 		Email: "test@example.com",
@@ -20,7 +18,8 @@ func TestIntercom(t *testing.T){
 	}
 	savedUser, err := ic.Users.Save(&user)
 	if(err!=nil){
-		fmt.Println(err.Error())
+		t.Error(err)
+		return
 	}
 	fmt.Println(savedUser)
 
@@ -38,22 +37,23 @@ func TestIntercom(t *testing.T){
 	//msg := intercom.NewUserMessage(intercom.User{ID: savedUser.ID}, "body123")
 	msg := intercom.NewUserMessage(intercom.User{UserID: "27"}, "body123")
 	savedMessage, err := ic.Messages.Save(&msg)
-
 	if(err!=nil){
-		fmt.Println(err.Error())
+		t.Error(err)
+		return
 	}
 	fmt.Println(savedMessage)
 
 	c,err:=ic.Conversations.Reply("last", &savedUser,intercom.CONVERSATION_COMMENT,"append message")
 	if(err!=nil){
-		fmt.Println(err.Error())
+		t.Error(err)
 		return
 	}
 	fmt.Println(c)
 
 	l,err:=ic.Conversations.ListAll(intercom.PageParams{})
-		if(err!=nil){
-		fmt.Println(err.Error())
+	if(err!=nil){
+		t.Error(err)
+		return
 	}
 	fmt.Println(l)
 }
