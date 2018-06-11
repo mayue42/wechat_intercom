@@ -56,20 +56,17 @@ func SendTextMessage(open_id string, message string)error{
 	//resp,err:=http.Post(url,"application/json",bytes.NewBuffer(str))
 	resp,err:=http.Post(url,"application/json",bytes.NewReader(str))
 	if(err!=nil){
-		fmt.Errorf(err.Error())
 		return err
 	}
 	defer resp.Body.Close()
 	body,err:=ioutil.ReadAll(resp.Body)
 	if(err!=nil){
-		fmt.Errorf(err.Error())
 		return err
 	}
 	reply:=Reply{}
 	json.Unmarshal(body,&reply)
 	if(reply.ErrCode!=0 || reply.ErrMsg!="ok"){
-		fmt.Errorf("reply error! code:%d;msg:%s\n",reply.ErrCode,reply.ErrMsg)
-		return errors.New("reply eror")
+		return errors.New(fmt.Sprintf("reply error! code:%d;msg:%s\n",reply.ErrCode,reply.ErrMsg))
 	}
 	return nil
 }
@@ -79,13 +76,11 @@ func GetUserInfo(open_id string)(*UserInfoReply,error){
 	url:=fmt.Sprintf(USER_INFO_URL,token,open_id)
 	resp,err:=http.Post(url,"application/json",nil)
 	if(err!=nil){
-		fmt.Errorf(err.Error())
 		return nil,err
 	}
 	defer resp.Body.Close()
 	body,err:=ioutil.ReadAll(resp.Body)
 	if(err!=nil){
-		fmt.Errorf(err.Error())
 		return nil,err
 	}
 	fmt.Println(string(body))
@@ -100,8 +95,6 @@ func GetUserInfo(open_id string)(*UserInfoReply,error){
 		err = json.Unmarshal(body, &reply)
 		fmt.Println(reply)
 		if (err != nil) {
-			fmt.Println("Unmarshal error")
-			fmt.Println(err.Error())
 			return nil, err
 		}
 		return &reply, nil

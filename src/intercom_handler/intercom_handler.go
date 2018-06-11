@@ -17,33 +17,27 @@ func HandleIntercomGet(w http.ResponseWriter, r *http.Request){
 func HandleIntercomPost(w http.ResponseWriter, r *http.Request){
 	// to do verify token
 	if err:=myintercom.ValidateRequest(r);err!=nil{
-		fmt.Println(err)
+		fmt.Printf("Error webhook request validate: %s",err)
 		return
 	}
-
 
 	// get content
 	notif, err := intercom.NewNotification(r.Body)
 	if(err!=nil){
-		fmt.Println("Read body error")
-		fmt.Println(err)
+		fmt.Printf("Read body error%s",err)
 		return
 	}
-	fmt.Println(notif)
-	fmt.Println(notif.Conversation)
 
 	if(notif.Topic=="conversation.admin.replied") {
 		openid := notif.Conversation.User.UserID
 		mss := notif.Conversation.ConversationParts.Parts
 		text := ""
-		fmt.Println("message recieve:")
 		for _, ms := range mss {
-			fmt.Println(ms.Body)
 			text += (util.RemoveTag(ms.Body) + "\n")
 		}
 		err = wechat.SendTextMessage(openid, text)
 		if err != nil {
-			fmt.Println(err.Error())
+			fmt.Printf("Error Send text message: %s",err)
 		}
 	}
 }
