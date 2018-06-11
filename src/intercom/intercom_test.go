@@ -50,10 +50,10 @@ func TestIntercom(t *testing.T){
 	}
 	fmt.Println(c)
 
-	l,err:=ic.Conversations.ListAll(intercom.PageParams{})
-	if(err!=nil){
-		t.Error(err)
-		return
-	}
-	fmt.Println(l)
+	//l,err:=ic.Conversations.ListAll(intercom.PageParams{})
+	//if(err!=nil){
+	//	t.Error(err)
+	//	return
+	//}
+	//fmt.Println(l)
 }

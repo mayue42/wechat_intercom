@@ -6,6 +6,7 @@ import (
 	"util"
 	"wechat"
 	"gopkg.in/intercom/intercom-go.v2"
+	myintercom "intercom"
 )
 
 func HandleIntercomGet(w http.ResponseWriter, r *http.Request){
@@ -15,11 +16,17 @@ func HandleIntercomGet(w http.ResponseWriter, r *http.Request){
 
 func HandleIntercomPost(w http.ResponseWriter, r *http.Request){
 	// to do verify token
+	if err:=myintercom.ValidateRequest(r);err!=nil{
+		fmt.Println(err)
+		return
+	}
+
 
 	// get content
 	notif, err := intercom.NewNotification(r.Body)
 	if(err!=nil){
-		fmt.Println(err.Error())
+		fmt.Println("Read body error")
+		fmt.Println(err)
 		return
 	}
 	fmt.Println(notif)
